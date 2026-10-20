@@ -1,13 +1,14 @@
 # Visual Studio Code with the extension of the ARM assembly syntax of the course. The installation is done by the
-# scripts of this repository and of arm-syntax-vscode-extension, the same ones used to install them in a host.
+# scripts in src/ of this repository and of arm-syntax-vscode-extension (with the assets downloaded into assets/ by
+# scripts/download_assets.sh), the same ones used to install them in a host.
 
-# Install script of the extension, from its repository (docker-bake.hcl of bmde uses the local checkout instead)
 # Base image of the BMDE images (docker-bake.hcl of bmde replaces this stage by the base image being built)
 FROM aleixmt/bmde-base:latest AS bmde-base
 
+# Install script of the extension and its latest release, laid out as in its repository, downloaded into assets/ by
+# scripts/download_assets.sh (docker-bake.hcl of bmde uses the checkout of the extension instead)
 FROM scratch AS extension
-ADD --chmod=755 https://raw.githubusercontent.com/URV-teacher/arm-syntax-vscode-extension/main/scripts/install_extension.sh \
-    /scripts/install_extension.sh
+COPY assets/arm-syntax-vscode-extension/ /
 
 
 FROM bmde-base
@@ -15,16 +16,16 @@ FROM bmde-base
 RUN bmde-install-display
 
 RUN --mount=type=bind,target=/component \
-    /component/scripts/install_vscode.sh \
+    /component/src/install_vscode.sh \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --chmod=755 entrypoint.sh /entrypoint.sh
+COPY --chmod=755 src/entrypoint.sh /entrypoint.sh
 
 RUN useradd --create-home --uid 1000 --shell /bin/bash vscode \
     && mkdir -p /input
 USER vscode
 # Extensions are installed for the user
-RUN --mount=type=bind,from=extension,target=/extension bash /extension/scripts/install_extension.sh
+RUN --mount=type=bind,from=extension,target=/extension bash /extension/src/install_extension.sh
 WORKDIR /input
 
 ENTRYPOINT ["/entrypoint.sh"]
