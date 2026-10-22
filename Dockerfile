@@ -15,8 +15,11 @@ FROM bmde-base
 
 RUN bmde-install-display
 
+# install_container_launcher.sh makes `code` run without the sandbox of Chromium, which containers cannot use. The full
+# development environment of the BMDE copies /URV/bmde/vscode from this image, so it gets the same launcher
 RUN --mount=type=bind,target=/component \
     /component/src/install_vscode.sh \
+    && /component/src/install_container_launcher.sh \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --chmod=755 src/entrypoint.sh /entrypoint.sh

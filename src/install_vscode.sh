@@ -29,6 +29,11 @@ if [ ! -x "${VSCODE_DIR}/bin/code" ]; then
 fi
 ${SUDO} apt-get satisfy -y --no-install-recommends "$(cat "${DEPENDS}")"
 
+# The helper of the sandbox of Chromium must be setuid root, which the package of VS Code does on its installation
+# (not on extraction), or code aborts. Also when VS Code was already there (e.g. copied from another image)
+${SUDO} chown root:root "${VSCODE_DIR}/chrome-sandbox"
+${SUDO} chmod 4755 "${VSCODE_DIR}/chrome-sandbox"
+
 ${SUDO} tee /etc/profile.d/bmde-vscode.sh > /dev/null <<PROFILE
 case ":\${PATH}:" in
   *":${VSCODE_DIR}/bin:"*) ;;
