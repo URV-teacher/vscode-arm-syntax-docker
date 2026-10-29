@@ -12,3 +12,4 @@ if [ "${sandbox_mode}" != "0 4755" ]; then
   echo "${vscode_dir}/chrome-sandbox has owner and mode '${sandbox_mode}' instead of '0 4755'" >&2
   exit 1
 fi
+echo "VS Code OK"
